@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    kotlin("plugin.serialization") version "2.2.0"
 }
 
 kotlin {
@@ -69,6 +70,25 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.material.icons.core)
+            implementation(libs.bundles.serialization)
+
+
+            // FlowMVI core
+            implementation(libs.flowmvi.core)
+
+            // FlowMVI Compose
+            implementation(libs.flowmvi.compose)
+
+            // FlowMVI Saved State
+            implementation(libs.flowmvi.savedstate)
+
+            // FlowMVI debugger client (optional, dev/debug only)
+            //implementation(libs.flowmvi.debugger.client)
+
+            // FlowMVI Essenty integration (optional, if using Decompose)
+            implementation(libs.flowmvi.essenty)
+            implementation(libs.flowmvi.essenty.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
