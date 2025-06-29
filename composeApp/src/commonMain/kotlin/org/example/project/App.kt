@@ -29,6 +29,7 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            //CounterScreen()
             Button(onClick = { showContent = !showContent }) {
                 Text("Click me!")
             }

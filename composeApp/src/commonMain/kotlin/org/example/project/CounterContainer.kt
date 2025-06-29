@@ -1,5 +1,6 @@
 package org.example.project
 
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import pro.respawn.flowmvi.api.*
 import pro.respawn.flowmvi.dsl.store
@@ -11,13 +12,15 @@ import pro.respawn.flowmvi.savedstate.api.NullRecover
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import pro.respawn.flowmvi.plugins.recover
+import pro.respawn.flowmvi.plugins.whileSubscribed
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 data class CounterStore(val value: Int = 0)
 
-@Serializable
 data class ErrorState(val message: String? = null)
 
+@Serializable
 sealed interface CounterState : MVIState {
     val counter: CounterStore
 
@@ -34,7 +37,6 @@ sealed interface CounterState : MVIState {
         val error: ErrorState,
         override val counter: CounterStore = CounterStore()
     ) : CounterState
-
 }
 
 @Serializable
@@ -68,12 +70,20 @@ class CounterContainer : Container<CounterState, CounterIntent, CounterAction> {
         serializeState(
             path = ".cache",
             recover = NullRecover,
-            serializer = CounterState.Content.serializer(),
+            serializer = CounterState.serializer(),
             behaviors = setOf(
-                SaveBehavior.OnUnsubscribe(),
+                SaveBehavior.OnChange(),
                 SaveBehavior.Periodic()
             )
         )
+        whileSubscribed {
+            while (isActive) {
+                delay(1.seconds)
+                updateState<CounterState.Content, _> {
+                    copy(counter = counter.copy(value = counter.value + 2))
+                }
+            }
+        }
         reduce { intent ->
             when (intent) {
                 is CounterIntent.ClickedIncrement -> updateState<CounterState.Content, _> {

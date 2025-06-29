@@ -20,7 +20,7 @@ import pro.respawn.flowmvi.compose.dsl.subscribe
 
 @Composable
 fun CounterScreen() {
-    val container = remember { CounterViewModel().container }
+    val container = remember { CounterContainer() }
     val snackBar = remember { SnackbarHostState() }
     with(container.store) {
         LaunchedEffect(this) { start(this).awaitUntilClosed() }
