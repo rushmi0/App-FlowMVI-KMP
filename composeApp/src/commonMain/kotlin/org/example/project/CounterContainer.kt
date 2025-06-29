@@ -13,14 +13,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import pro.respawn.flowmvi.plugins.recover
 import pro.respawn.flowmvi.plugins.whileSubscribed
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 data class CounterStore(val value: Int = 0)
 
+@Serializable
 data class ErrorState(val message: String? = null)
 
-@Serializable
 sealed interface CounterState : MVIState {
     val counter: CounterStore
 
@@ -37,6 +38,7 @@ sealed interface CounterState : MVIState {
         val error: ErrorState,
         override val counter: CounterStore = CounterStore()
     ) : CounterState
+
 }
 
 @Serializable
@@ -70,9 +72,9 @@ class CounterContainer : Container<CounterState, CounterIntent, CounterAction> {
         serializeState(
             path = ".cache",
             recover = NullRecover,
-            serializer = CounterState.serializer(),
+            serializer = CounterState.Content.serializer(),
             behaviors = setOf(
-                SaveBehavior.OnChange(),
+                SaveBehavior.OnUnsubscribe(),
                 SaveBehavior.Periodic()
             )
         )
@@ -80,7 +82,7 @@ class CounterContainer : Container<CounterState, CounterIntent, CounterAction> {
             while (isActive) {
                 delay(1.seconds)
                 updateState<CounterState.Content, _> {
-                    copy(counter = counter.copy(value = counter.value + 2))
+                    copy(counter = counter.copy(value = counter.value + Random.nextInt(0, 100)))
                 }
             }
         }
